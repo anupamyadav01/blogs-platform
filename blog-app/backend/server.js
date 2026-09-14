@@ -4,11 +4,13 @@ const cors = require("cors");
 const connectDB = require("./config/connectDB.js");
 const userModel = require("./models/userModel.js");
 const userRouter = require("./routes/userRoutes.js");
+const blogRouter = require("./routes/blogRoutes.js");
 const app = express();
 
 app.use(express.json());
 app.use(cors());
-app.use(userRouter);
+app.use("/api/v1", userRouter);
+app.use("/api/v1", blogRouter);
 
 app.listen(5000, () => {
   console.log("Server is running on port 5000...");

@@ -1,3 +1,6 @@
+const userModel = require("../models/userModel.js");
+const mongoose = require("mongoose");
+
 const getUsers = async (req, res) => {
   try {
     const users = await userModel.find({});
@@ -9,7 +12,7 @@ const getUsers = async (req, res) => {
 
 const createUser = async (req, res) => {
   try {
-    const { name, email, password } = req.body;
+    const { name, email, password, blogs } = req.body;
 
     if (!name) {
       return res.status(400).json({
@@ -30,13 +33,13 @@ const createUser = async (req, res) => {
       });
     }
     const existingUser = await userModel.findOne({ email });
-    console.log(existingUser);
+    console.log("existingUser", existingUser);
 
-    // Create user
     const newUser = await userModel.create({
       name,
       email,
       password,
+      blogs,
     });
 
     return res.status(201).json({
@@ -45,7 +48,6 @@ const createUser = async (req, res) => {
       newUser,
     });
   } catch (error) {
-    // Handle duplicate email or server errors
     return res.status(500).json({
       success: false,
       message: error.message,
@@ -57,7 +59,6 @@ const getUserById = async (req, res) => {
   try {
     const { id } = req.params;
 
-    // 1. Validate if 'id' is a valid 24-hex-char MongoDB ObjectId
     if (!mongoose.Types.ObjectId.isValid(id)) {
       return res.status(400).json({
         success: false,
@@ -65,11 +66,8 @@ const getUserById = async (req, res) => {
       });
     }
 
-    // 2. Query a single document
-    const user = await userModel.findById({ _id });
-    console.log(user);
+    const user = await userModel.findById(id);
 
-    // 3. Check if user actually exists
     if (!user) {
       return res.status(404).json({
         success: false,
@@ -77,7 +75,6 @@ const getUserById = async (req, res) => {
       });
     }
 
-    // 4. Return the user object
     return res.status(200).json({
       success: true,
       message: "User fetched successfully",
