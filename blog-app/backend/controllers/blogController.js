@@ -1,5 +1,6 @@
 const blogModel = require("../models/blogModel.js");
 const userModel = require("../models/userModel.js");
+const { verifyToken } = require("../utils/generateJWT.js");
 
 const getAllBlogs = async (req, res) => {
   try {
@@ -46,6 +47,10 @@ const getBlogById = async (req, res) => {
 };
 const createBlog = async (req, res) => {
   try {
+    const isValid = verifyToken(req.body.token);
+    if (!isValid) {
+      return res.status(200).send({ message: "invalid jst token" });
+    }
     const { title, description, draft, creator } = req.body;
     if (!title) {
       return res.status(400).json({ message: "Title is required" });

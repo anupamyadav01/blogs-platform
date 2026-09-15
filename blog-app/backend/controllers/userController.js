@@ -1,5 +1,7 @@
 const userModel = require("../models/userModel.js");
 const mongoose = require("mongoose");
+const bcrypt = require("bcrypt");
+const generateJWT = require("../utils/generateJWT.js");
 
 const getUsers = async (req, res) => {
   try {
@@ -33,19 +35,65 @@ const createUser = async (req, res) => {
       });
     }
     const existingUser = await userModel.findOne({ email });
-    console.log("existingUser", existingUser);
-
+    if (existingUser) {
+      return res.status(409).json({
+        success: false,
+        message: "User already exists",
+      });
+    }
+    const saltRound = 10;
+    const hashedPassword = await bcrypt.hash(password, saltRound);
     const newUser = await userModel.create({
       name,
       email,
-      password,
+      password: hashedPassword,
       blogs,
     });
 
     return res.status(201).json({
       success: true,
       message: "User created successfully",
-      newUser,
+      newUser: {
+        name: newUser.name,
+        email: newUser.name,
+        blogs: newUser.blogs,
+      },
+    });
+  } catch (error) {
+    return res.status(500).json({
+      success: false,
+      message: { error: error.message, actual: "error during creating user" },
+    });
+  }
+};
+
+const loginUser = async (req, res) => {
+  try {
+    const { email, password } = req.body;
+    if (!email) {
+      return res.status(400).json({
+        success: false,
+        message: "Please enter email",
+      });
+    }
+    if (!password) {
+      return res.status(400).json({
+        success: false,
+        message: "Please enter password",
+      });
+    }
+
+    const user = await userModel.findOne({ email });
+
+    await bcrypt.compare(password, user.password);
+    const token = generateJWT({
+      email: user.email,
+      name: user.name,
+    });
+    return res.status(200).send({
+      sucess: true,
+      message: "user logged in sucessfully",
+      token,
     });
   } catch (error) {
     return res.status(500).json({
@@ -90,4 +138,4 @@ const getUserById = async (req, res) => {
 
 const updateUser = async (req, res) => {};
 
-module.exports = { getUsers, createUser, getUserById, updateUser };
+module.exports = { getUsers, createUser, loginUser, getUserById, updateUser };
