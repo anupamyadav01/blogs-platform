@@ -1,8 +1,11 @@
-import { useState } from "react";
+import { useContext, useState } from "react";
 import { useEffect } from "react";
 import { useNavigate } from "react-router-dom";
+import UserContext from "../context/UserContext";
 
 const Blogs = () => {
+  const { user } = useContext(UserContext);
+
   const [currentBlog, setCurrentBlog] = useState(null);
 
   const [blogs, setBlogs] = useState();
@@ -56,21 +59,21 @@ const Blogs = () => {
   const handleChangeDesc = (e) => {
     setCurrentBlog((prev) => ({ ...prev, description: e.target.value }));
   };
-  // fetching blogs data
+
   useEffect(() => {
-    const getBlogs = async () => {
+    const fetchData = async () => {
       const response = await fetch("http://localhost:5000/api/v1/blogs/", {
         method: "GET",
         headers: {
           "Content-Type": "application/json",
         },
       });
-      const data = await response.json();
+      const blogsData = await response.json();
 
-      setBlogs(data.blogs);
+      setBlogs(blogsData?.blogs);
     };
-    getBlogs();
-  }, [blogId]);
+    fetchData();
+  }, []);
 
   const navigate = useNavigate();
 
@@ -96,7 +99,7 @@ const Blogs = () => {
 
   return (
     <div className="min-h-screen bg-[#FDFDFD] px-4 py-12 text-gray-900 sm:px-6">
-      <div className="flex items-center justify-end gap-3 p-3">
+      <div className="flex max-w-4/5 items-center justify-end gap-3 p-3">
         <button
           name="create-blog"
           onClick={handleClick}
@@ -119,24 +122,31 @@ const Blogs = () => {
           </svg>
           Create Blog
         </button>
+        {user ? (
+          <div className="inline-flex cursor-pointer items-center gap-1.5 rounded-full border border-zinc-300 bg-white px-3 py-2 text-sm font-medium text-zinc-900 transition-colors hover:bg-zinc-100 focus:ring-2 focus:ring-zinc-900 focus:ring-offset-2 focus:outline-none">
+            {user?.name[0]}
+          </div>
+        ) : (
+          <div>
+            <button
+              name="login"
+              onClick={handleClick}
+              type="button"
+              className="cursor-pointer rounded-lg px-4 py-2 text-sm font-medium text-zinc-700 transition-colors hover:bg-zinc-100 hover:text-zinc-900 focus:ring-2 focus:ring-zinc-900 focus:ring-offset-2 focus:outline-none"
+            >
+              Login
+            </button>
 
-        <button
-          name="login"
-          onClick={handleClick}
-          type="button"
-          className="cursor-pointer rounded-lg px-4 py-2 text-sm font-medium text-zinc-700 transition-colors hover:bg-zinc-100 hover:text-zinc-900 focus:ring-2 focus:ring-zinc-900 focus:ring-offset-2 focus:outline-none"
-        >
-          Login
-        </button>
-
-        <button
-          name="sign-up"
-          onClick={handleClick}
-          type="button"
-          className="cursor-pointer rounded-lg bg-zinc-900 px-4 py-2 text-sm font-medium text-white shadow-sm transition-colors hover:bg-zinc-800 focus:ring-2 focus:ring-zinc-900 focus:ring-offset-2 focus:outline-none"
-        >
-          Sign Up
-        </button>
+            <button
+              name="sign-up"
+              onClick={handleClick}
+              type="button"
+              className="cursor-pointer rounded-lg bg-zinc-900 px-4 py-2 text-sm font-medium text-white shadow-sm transition-colors hover:bg-zinc-800 focus:ring-2 focus:ring-zinc-900 focus:ring-offset-2 focus:outline-none"
+            >
+              Sign Up
+            </button>
+          </div>
+        )}
       </div>
       <div className="relative mx-auto max-w-3xl">
         {showUpdateDialogBox ? (

@@ -12,6 +12,20 @@ const getUsers = async (req, res) => {
   }
 };
 
+const getCurrentUser = async (req, res) => {
+  const user = await userModel.findById(req.userId).select("-password");
+  if (!user) {
+    return res.status(404).json({
+      success: false,
+      message: "User not found",
+    });
+  }
+  res.json({
+    success: true,
+    user,
+  });
+};
+
 const createUser = async (req, res) => {
   try {
     const { name, email, password, blogs } = req.body;
@@ -146,4 +160,11 @@ const getUserById = async (req, res) => {
 
 const updateUser = async (req, res) => {};
 
-module.exports = { getUsers, createUser, loginUser, getUserById, updateUser };
+module.exports = {
+  getUsers,
+  createUser,
+  loginUser,
+  getUserById,
+  updateUser,
+  getCurrentUser,
+};

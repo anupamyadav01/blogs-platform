@@ -6,17 +6,20 @@ import Login from "./pages/Login";
 import CreateBlogs from "./components/createBlogs";
 import Error from "./pages/error";
 import UpdateBlog from "./components/updateBlog";
+import UserContextProvider from "./context/UserContextProvider";
 
 const App = () => {
   return (
-    <Routes>
-      <Route path="/" element={<Blogs />} />
-      <Route path="/signup" element={<Signup />} />
-      <Route path="/login" element={<Login />} />
-      <Route path="/create-blog" element={<CreateBlogs />} />
-      <Route path="/update-blog" element={<UpdateBlog />} />
-      <Route path="*" element={<Error />} />
-    </Routes>
+    <UserContextProvider>
+      <Routes>
+        <Route path="/" element={<Blogs />} />
+        <Route path="/signup" element={<Signup />} />
+        <Route path="/login" element={<Login />} />
+        <Route path="/create-blog" element={<CreateBlogs />} />
+        <Route path="/update-blog" element={<UpdateBlog />} />
+        <Route path="*" element={<Error />} />
+      </Routes>
+    </UserContextProvider>
   );
 };
 
