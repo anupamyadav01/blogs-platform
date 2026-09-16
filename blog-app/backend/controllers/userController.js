@@ -1,7 +1,7 @@
 const userModel = require("../models/userModel.js");
 const mongoose = require("mongoose");
 const bcrypt = require("bcrypt");
-const generateJWT = require("../utils/generateJWT.js");
+const jwt = require("jsonwebtoken");
 
 const getUsers = async (req, res) => {
   try {
@@ -86,10 +86,18 @@ const loginUser = async (req, res) => {
     const user = await userModel.findOne({ email });
 
     await bcrypt.compare(password, user.password);
-    const token = generateJWT({
-      email: user.email,
-      name: user.name,
-    });
+
+    const isMatch = await bcrypt.compare(password, user.password);
+    if (!isMatch) {
+      return res
+        .status(400)
+        .json({ success: false, message: "Invalid credentials" });
+    }
+    const privateKey = "something-private-key";
+    const token = jwt.sign(
+      { email: user.email, name: user.name, id: user._id },
+      privateKey,
+    );
     return res.status(200).send({
       sucess: true,
       message: "user logged in sucessfully",

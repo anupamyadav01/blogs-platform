@@ -1,6 +1,6 @@
+const verifyUser = require("../middlewares/auth.js");
 const blogModel = require("../models/blogModel.js");
 const userModel = require("../models/userModel.js");
-const { verifyToken } = require("../utils/generateJWT.js");
 
 const getAllBlogs = async (req, res) => {
   try {
@@ -47,11 +47,11 @@ const getBlogById = async (req, res) => {
 };
 const createBlog = async (req, res) => {
   try {
-    const isValid = verifyToken(req.body.token);
-    if (!isValid) {
-      return res.status(200).send({ message: "invalid jst token" });
-    }
-    const { title, description, draft, creator } = req.body;
+    const creator = req.user;
+    
+    // console.log(creator);
+
+    const { title, description, draft } = req.body;
     if (!title) {
       return res.status(400).json({ message: "Title is required" });
     }
@@ -75,7 +75,7 @@ const createBlog = async (req, res) => {
     });
     return res.status(201).json({
       success: true,
-      message: "User created successfully",
+      message: "Blog created successfully",
       newBlog,
     });
   } catch (error) {
@@ -88,9 +88,11 @@ const createBlog = async (req, res) => {
 const updateBlog = async (req, res) => {
   try {
     const blogId = req.params.id;
+    console.log(blogId);
+
     const data = req.body;
     if (!blogId) {
-      return res.status(400).json({ message: "Please provide a Blog ID" });
+      return res.status(400).json({ message: "Invalid blog update request" });
     }
     const requestedBlog = await blogModel.findByIdAndUpdate(blogId, data, {
       returnDocument: "after",
@@ -100,8 +102,8 @@ const updateBlog = async (req, res) => {
     }
     return res.status(200).json({
       success: true,
-      message: "User updated successfully",
-      requestedBlog,
+      message: "Blog updated successfully",
+      updatedBlog: requestedBlog,
     });
   } catch (error) {
     return res.status(500).json({
@@ -112,7 +114,11 @@ const updateBlog = async (req, res) => {
 };
 const deleteBlog = async (req, res) => {
   try {
+    console.log("deleteBlog");
+
     const blogId = req.params.id;
+    console.log(blogId);
+
     if (!blogId) {
       return res.status(400).json({ message: "Please provide a Blog ID" });
     }
