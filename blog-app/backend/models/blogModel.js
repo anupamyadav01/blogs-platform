@@ -19,8 +19,13 @@ const blogSchema = new mongoose.Schema(
     creator: {
       type: mongoose.Schema.Types.ObjectId,
       ref: "User",
-      required: true,
     },
+    comment: [
+      {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: "Comment",
+      },
+    ],
   },
   {
     timestamps: true,

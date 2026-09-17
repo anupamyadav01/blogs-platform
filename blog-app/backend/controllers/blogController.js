@@ -1,6 +1,7 @@
 const verifyUser = require("../middlewares/auth.js");
 const blogModel = require("../models/blogModel.js");
 const userModel = require("../models/userModel.js");
+const CommentModel = require("../models/commentModel.js");
 
 const getAllBlogs = async (req, res) => {
   try {
@@ -112,6 +113,60 @@ const updateBlog = async (req, res) => {
     });
   }
 };
+
+const commentOnBlog = async (req, res) => {
+  const { comment } = req.body;
+  const blogId = req.params.id;
+  const userId = req.user;
+
+  if (!comment || comment.trim() === "") {
+    return res.status(400).json({
+      success: false,
+      message: "Comment text cannot be empty",
+    });
+  }
+  try {
+    const newComment = await CommentModel.create({
+      comment: comment.trim(),
+      blog: blogId,
+      user: userId,
+    });
+
+    const updatedBlog = await blogModel
+      .findByIdAndUpdate(
+        blogId,
+        { $push: { comment: newComment._id } },
+        { new: true },
+      )
+      .populate({
+        path: "comment",
+        populate: { path: "user", select: "name email" },
+      });
+
+    if (!updatedBlog) {
+      return res.status(404).json({
+        success: false,
+        message: "Blog not found",
+      });
+    }
+
+    return res.status(201).json({
+      success: true,
+      message: "Comment posted successfully",
+      comment: newComment,
+      blog: updatedBlog,
+    });
+  } catch (error) {
+    return res.status(500).json({
+      success: false,
+      message: "Server error",
+      error: error.message,
+    });
+  }
+};
+
+module.exports = { commentOnBlog };
+
 const deleteBlog = async (req, res) => {
   try {
     console.log("deleteBlog");
@@ -145,4 +200,5 @@ module.exports = {
   createBlog,
   updateBlog,
   deleteBlog,
+  commentOnBlog,
 };
