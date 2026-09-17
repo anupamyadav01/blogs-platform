@@ -15,14 +15,14 @@ const UserContextProvider = ({ children }) => {
         },
       });
       const userData = await response.json();
-      console.log(userData);
+      // console.log(userData);
       setUser(userData?.user);
     };
     fetchData();
   }, []);
 
   return (
-    <UserContext.Provider value={{ user, setUser }}>
+    <UserContext.Provider value={{ user, setUser, token: currentUser?.token }}>
       {children}
     </UserContext.Provider>
   );

@@ -48,7 +48,7 @@ const getBlogById = async (req, res) => {
 const createBlog = async (req, res) => {
   try {
     const creator = req.user;
-    
+
     // console.log(creator);
 
     const { title, description, draft } = req.body;

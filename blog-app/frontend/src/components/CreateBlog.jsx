@@ -1,29 +1,36 @@
-import { useState } from "react";
-import { Navigate } from "react-router-dom";
+import { useContext, useState } from "react";
+import { Navigate, useNavigate } from "react-router-dom";
+import UserContext from "../context/UserContext";
 
 const CreateBlogs = () => {
+  const navigate = useNavigate();
   const [userData, setUserData] = useState({
     title: "",
     description: "",
   });
-  const user = JSON.parse(localStorage.getItem("User"));
+  const { token } = useContext(UserContext);
 
-  if (!user?.token) {
+  if (!token) {
     return <Navigate to={"/login"} />;
   }
+
+  // create post - publish post
   const handleSubmit = async (e) => {
     e.preventDefault();
 
     const response = await fetch("http://localhost:5000/api/v1/blogs/", {
       method: "POST",
-      body: JSON.stringify(userData, user.token),
+      body: JSON.stringify(userData),
       headers: {
         "Content-Type": "application/json",
-        Authorization: `Bearer ${user.token}`,
+        Authorization: `Bearer ${token}`,
       },
     });
 
     const data = await response.json();
+    if (data.success) {
+      navigate("/");
+    }
     console.log(data);
   };
 
@@ -69,73 +76,6 @@ const CreateBlogs = () => {
               className="w-full rounded-lg border border-slate-300 px-4 py-3 text-slate-900 placeholder-slate-400 transition focus:border-transparent focus:ring-2 focus:ring-blue-500 focus:outline-none"
             />
           </div>
-
-          <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
-            {/* Category */}
-            {/* <div>
-              <label
-                htmlFor="category"
-                className="block text-sm font-semibold text-slate-700 mb-2"
-              >
-                Category <span className="text-red-500">*</span>
-              </label>
-              <select
-                id="category"
-                name="category"
-                value={formData.category}
-                onChange={handleChange}
-                required
-                className="w-full px-4 py-3 rounded-lg border border-slate-300 text-slate-900 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition bg-white"
-              >
-                <option value="" disabled>
-                  Select a category
-                </option>
-                <option value="technology">Technology</option>
-                <option value="lifestyle">Lifestyle</option>
-                <option value="business">Business</option>
-                <option value="education">Education</option>
-                <option value="health">Health & Fitness</option>
-              </select>
-            </div> */}
-
-            {/* Tags */}
-            {/* <div>
-              <label
-                htmlFor="tags"
-                className="block text-sm font-semibold text-slate-700 mb-2"
-              >
-                Tags (comma-separated)
-              </label>
-              <input
-                type="text"
-                id="tags"
-                name="tags"
-                value={formData.tags}
-                onChange={handleChange}
-                placeholder="react, tailwind, webdev"
-                className="w-full px-4 py-3 rounded-lg border border-slate-300 text-slate-900 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition"
-              />
-            </div> */}
-          </div>
-
-          {/* Cover Image URL */}
-          {/* <div>
-            <label
-              htmlFor="coverImage"
-              className="block text-sm font-semibold text-slate-700 mb-2"
-            >
-              Cover Image URL
-            </label>
-            <input
-              type="url"
-              id="coverImage"
-              name="coverImage"
-              value={formData.coverImage}
-              onChange={handleChange}
-              placeholder="https://example.com/image.jpg"
-              className="w-full px-4 py-3 rounded-lg border border-slate-300 text-slate-900 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition"
-            />
-          </div> */}
 
           {/* Content / Body */}
           <div>
