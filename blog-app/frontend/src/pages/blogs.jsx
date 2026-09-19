@@ -60,6 +60,23 @@ const Blogs = () => {
     console.log(data);
   };
 
+  const handleLike = async (post) => {
+    const response = await fetch(
+      `http://localhost:5000/api/v1/blogs/like/${post?._id}`,
+      {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+      },
+    );
+    console.log("reached here ");
+
+    const data = await response.json();
+    console.log(data);
+  };
+
   const handleChangeTitle = (e) => {
     setFormData((prev) => ({ ...prev, title: e.target.value }));
   };
@@ -230,6 +247,13 @@ const Blogs = () => {
                 <span className="font-mono text-[11px]">
                   {post?.draft ? "Draft" : "Published"}
                 </span>
+                <button
+                  type="button"
+                  onClick={() => handleLike(post)}
+                  className="flex h-8 w-8 cursor-pointer items-center justify-center rounded-full bg-pink-500 text-xs font-semibold tracking-wider text-white"
+                >
+                  Like
+                </button>
                 <span className="cursor-pointer font-medium text-zinc-900 underline-offset-4 group-hover:underline">
                   Read Story →
                 </span>

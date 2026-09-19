@@ -5,17 +5,47 @@ const {
   createBlog,
   updateBlog,
   deleteBlog,
-  commentOnBlog,
+  likeBlog,
 } = require("../controllers/blogController.js");
 const verifyUser = require("../middlewares/auth.js");
+const {
+  addComment,
+  deleteComment,
+  editComment,
+  likeComment,
+} = require("../controllers/commentController.js");
 
 const router = express.Router();
 
+//get all blogs
 router.get("/blogs", getAllBlogs);
-router.get("/blogs/:id", getBlogById);
+
+// post a blog
 router.post("/blogs", verifyUser, createBlog);
+
+// get a blog by blog id
+router.get("/blogs/:id", getBlogById);
+
+// update blog
 router.patch("/blogs/:id", verifyUser, updateBlog);
-router.post("/blogs/comment/:id", verifyUser, commentOnBlog);
+
+// like a blog
+router.post("/blogs/like/:id", verifyUser, likeBlog);
+
+//delete blog
 router.delete("/blogs/:id", verifyUser, deleteBlog);
+
+// _____________________________________________________________________
+// comment using blog id
+router.post("/blogs/comment/:id", verifyUser, addComment);
+
+// delete comment usign id
+router.delete("/blogs/comment/:id", verifyUser, deleteComment);
+
+// edit comment
+router.patch("/blogs/comment/:id", verifyUser, editComment);
+
+// like comment
+router.patch("/blogs/comment/:id", verifyUser, likeComment);
 
 module.exports = router;

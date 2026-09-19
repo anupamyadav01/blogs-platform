@@ -114,46 +114,35 @@ const updateBlog = async (req, res) => {
   }
 };
 
-const commentOnBlog = async (req, res) => {
-  const { comment } = req.body;
-  const blogId = req.params.id;
-  const userId = req.user;
-
-  if (!comment || comment.trim() === "") {
-    return res.status(400).json({
-      success: false,
-      message: "Comment text cannot be empty",
-    });
-  }
+const likeBlog = async (req, res) => {
   try {
-    const newComment = await CommentModel.create({
-      comment: comment.trim(),
-      blog: blogId,
-      user: userId,
-    });
+    const blogId = req.params.id;
+    const userId = req.user;
 
-    const updatedBlog = await blogModel
-      .findByIdAndUpdate(
-        blogId,
-        { $push: { comment: newComment._id } },
-        { new: true },
-      )
-      .populate({
-        path: "comment",
-        populate: { path: "user", select: "name email" },
-      });
-
-    if (!updatedBlog) {
+    const blog = await blogModel.findById(blogId);
+    if (!blog) {
       return res.status(404).json({
         success: false,
         message: "Blog not found",
       });
     }
 
-    return res.status(201).json({
+    const alreadyLiked = blog.like?.some(
+      (id) => id.toString() === userId.toString(),
+    );
+
+    const updateQuery = alreadyLiked
+      ? { $pull: { like: userId } }
+      : { $push: { like: userId } };
+
+    const updatedBlog = await blogModel.findByIdAndUpdate(blogId, updateQuery, {
+      new: true,
+    });
+
+    return res.status(200).json({
       success: true,
-      message: "Comment posted successfully",
-      comment: newComment,
+      message: alreadyLiked ? "Blog unliked" : "Blog liked",
+      likesCount: updatedBlog.like.length,
       blog: updatedBlog,
     });
   } catch (error) {
@@ -164,8 +153,6 @@ const commentOnBlog = async (req, res) => {
     });
   }
 };
-
-module.exports = { commentOnBlog };
 
 const deleteBlog = async (req, res) => {
   try {
@@ -200,5 +187,5 @@ module.exports = {
   createBlog,
   updateBlog,
   deleteBlog,
-  commentOnBlog,
+  likeBlog,
 };
